@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Abhijeet Naware - FX Artist Portfolio</title>
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        canvas#particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -4;
+            opacity: 1;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 50px;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            transition: background 0.15s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(0, 0, 0, 0.95);
+        }
+
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+
+        .navbar a:hover {
+            color: #ff3b3b;
+            transform: scale(1.15);
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 50px;
+            position: relative;
+            background: #0a0a0a;
+        }
+		
+		#about {
+			background: transparent !important; /* Makes background fully see-through */
+			}
+
+        #home {
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('https://images.unsplash.com/photo-1579547945413-497e1b99a7c2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            text-align: center;
+        }
+
+        #home .content {
+            max-width: 900px;
+        }
+
+        #home h1 {
+            font-size: 5.5em;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            transition: transform 0.3s ease;
+        }
+
+        #home h1:hover {
+            transform: scale(1.05);
+        }
+
+        #home p {
+            font-size: 1.8em;
+            margin: 20px 0;
+            line-height: 1.4;
+            transition: opacity 0.15s ease;
+        }
+
+        #home .cta {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #ff3b3b;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1.4em;
+            font-weight: 600;
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+
+        #home .cta:hover {
+            background: #ff5c5c;
+            transform: scale(1.15);
+        }
+
+        #about .content {
+            max-width: 1000px;
+            text-align: center;
+        }
+
+        #about .skills, #about .experience, #about .education {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        #about .skill-item, #about .experience-item, #about .education-item {
+            background: #222;
+            padding: 20px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: transform 0.15s ease, background 0.15s ease;
+            text-align: center;
+        }
+
+        #about .skill-item:hover, #about .experience-item:hover, #about .education-item:hover {
+            background: #ff3b3b;
+            transform: scale(1.15);
+        }
+
+        #about .experience-item, #about .education-item {
+            flex: 1 1 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #portfolio {
+            background: #000;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .portfolio-video {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .video-container {
+            display: flex;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s ease;
+        }
+
+        .video-item {
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .video-item.active {
+            opacity: 1;
+        }
+
+        .video-item iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            object-fit: cover;
+        }
+
+        .video-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .video-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .video-dot.active {
+            background: #ff3b3b;
+        }
+
+        .video-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2em;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease;
+            z-index: 10;
+        }
+
+        .video-arrow:hover {
+            background: #ff3b3b;
+            transform: translateY(-50%) scale(1.15);
+        }
+
+        .arrow-left {
+            left: 20px;
+        }
+
+        .arrow-right {
+            right: 20px;
+        }
+
+        #contact {
+            background: transparent !important;
+        }
+
+        #contact .content {
+            max-width: 700px;
+            text-align: center;
+        }
+
+        #contact form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #contact input,
+        #contact textarea {
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            background: #222;
+            color: #fff;
+            font-size: 1.1em;
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+
+        #contact input:hover,
+        #contact textarea:hover {
+            background: #333;
+            transform: scale(1.02);
+        }
+
+        #contact button {
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            background: #ff3b3b;
+            color: #fff;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.15s ease;
+        }
+
+        #contact button:hover {
+            background: #ff5c5c;
+            transform: scale(1.05);
+        }
+
+        footer {
+            background: #000;
+            padding: 20px;
+            text-align: center;
+            color: #888;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .social-links a {
+            display: inline-block;
+            transition: transform 0.15s ease, fill 0.15s ease;
+        }
+
+        .social-links a:hover {
+            transform: scale(1.15);
+        }
+
+        .social-links svg {
+            width: 30px;
+            height: 30px;
+            fill: #ff3b3b;
+            transition: fill 0.15s ease;
+        }
+
+        .social-links a:hover svg {
+            fill: #ff5c5c;
+        }
+
+        .parallax {
+            position: absolute;
+            width: 100%;
+            height: 120%;
+            top: 0;
+            left: 0;
+            z-index: -4;
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        h2 {
+            font-size: 4em;
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 600;
+            transition: transform 0.15s ease;
+        }
+
+        h2:hover {
+            transform: scale(1.05);
+        }
+
+        h3 {
+            font-size: 2em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            #home h1 {
+                font-size: 3.5em;
+            }
+
+            #home p {
+                font-size: 1.5em;
+            }
+
+            .navbar {
+                padding: 15px;
+            }
+
+            .navbar ul {
+                gap: 15px;
+            }
+
+            .video-arrow {
+                font-size: 1.5em;
+                padding: 8px;
+            }
+
+            .social-links svg {
+                width: 25px;
+                height: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-arrow {
+                font-size: 1.2em;
+                padding: 6px;
+            }
+
+            .social-links svg {
+                width: 20px;
+                height: 20px;
+            }
+        }
+          /* existing styles here… */
+
+    /* 🔥 Add these at the bottom */
+   .bg-video-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  z-index: -3;
+}
+
+.bg-video-iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%) scale(1.15); /* ✅ Scaled and centered */
+  transform-origin: center center;
+  opacity: 1;
+  pointer-events: none;
+  object-fit: cover; /* optional but recommended */
+}
+   
+@media (max-width: 768px) {
+    #home h1 {
+        font-size: 3.2em;
+    }
+    #home p {
+        font-size: 1.2em;
+    }
+    #home .cta {
+        font-size: 1.1em;
+        padding: 12px 28px;
+    }
+    .section {
+        padding: 60px 20px;
+    }
+    .video-container iframe {
+        height: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    #home h1 {
+        font-size: 2.4em;
+    }
+    #home p {
+        font-size: 1em;
+    }
+    .navbar ul {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .navbar a {
+        font-size: 1em;
+    }
+}
+</style>
+</head>
+<body>
+<canvas id="particleCanvas"></canvas>
+<nav class="navbar">
+<ul>
+<li><a href="#home">Home</a></li>
+<li><a href="#about">About</a></li>
+<li><a href="#portfolio">Work</a></li>
+<li><a href="#contact">Contact</a></li>
+</ul>
+</nav>
+<!-- HOME Section with Background Video -->
+<section class="section" id="home" style="position: relative; overflow: hidden;">
+<!-- 🔥 Video Background -->
+<div class="bg-video-wrapper">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=FX_BG_1_yqymea&amp;player[autoplay]=true&amp;player[muted]=true&amp;player[loop]=true&amp;player[controls]=false&amp;player[hideContextMenu]=true&amp;player[showLogo]=false" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<!-- Foreground Content -->
+<div class="content" style="z-index: 2; position: relative; text-align: center;">
+<h1 style="font-size: 6em; color: white; letter-spacing: 5px; text-transform: uppercase; text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.7);">Abhijeet Naware</h1>
+<p style="font-size: 1.8em; color: #ddd; margin: 20px 0;">
+      FX Technical Director | Mumbai, India<br/>
+      Bringing cinematic visions to life with explosive particle effects, fluid simulations, and dynamic animations.
+    </p>
+<a class="cta" href="#portfolio">Explore My Work</a>
+</div>
+</section>
+<!-- ABOUT Section with Background Video -->
+<section class="section" id="about" style="position: relative; overflow: hidden;">
+<!-- 🔥 Video Background for About Section -->
+<div class="bg-video-wrapper">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=FX_BG_2_yqugsl&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<!-- Parallax Layer -->
+<!-- <div class="parallax" style="background-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');"></div> -->
+<!-- Foreground Content -->
+<div class="content">
+<h2>About Me</h2>
+<p>A passionate VFX artist with a knack for creating immersive visuals that captivate and inspire. Specializing in particle systems, fluid dynamics, and motion graphics, I use tools like Houdini, Maya, and Nuke to craft stunning effects for films and personal projects.</p>
+<div class="skills">
+<div class="skill-item">Houdini</div>
+<div class="skill-item">Nuke</div>
+<div class="skill-item">Adobe Premier Pro</div>
+</div>
+<h3>Experience</h3>
+<div class="experience">
+<div class="experience-item">
+<strong>DNEG – FX Technical Director</strong><br/>
+        Mar 2022 – Present, Mumbai
+      </div>
+<div class="experience-item">
+<strong>DNEG – Houdini FX Trainee</strong><br/>
+        Nov 2021 – May 2022
+      </div>
+</div>
+<h3>Projects</h3>
+<div class="education">
+<div class="education-item"><strong>Masters of the Air</strong></div>
+<div class="education-item"><strong>Mickey 17</strong></div>
+<div class="education-item"><strong>Dune: Part Two</strong></div>
+<div class="education-item"><strong>Chhaava</strong></div>
+<div class="education-item"><strong>The SpongeBob Movie (2025)</strong></div>
+<div class="education-item"><strong>Munjya</strong></div>
+<div class="education-item"><strong>Sky Force</strong></div>
+<div class="education-item"><strong>Fighter</strong></div>
+<div class="education-item"><strong>The Traveller</strong></div>
+<div class="education-item"><strong>Yudhra</strong></div>
+</div>
+</div>
+</section>
+<section class="section" id="portfolio">
+<div class="parallax" style="background-image: url('https://images.unsplash.com/photo-1618005182380-9d8e6105c7e9?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=1920&amp;q=80');"></div>
+<h2>Work</h2>
+<div class="portfolio-video">
+<div class="video-container">
+<div class="video-item active">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_10_giipjt&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_8_gdqcnl&amp;player[autoplay]=true&amp;player[muted]=true&amp;player[loop]=true&amp;player[controls]=false&amp;player[sourceTypes][0]=hls" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_9_iptdyh&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_13_e5so5n&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_11_guenwd&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_14_skfjuz&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_12_pxs6rm&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_7_w99ztn&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_16_hoi5gf&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_6_uvdbyy&amp;profile=cld-looping" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_4_h4cfl7&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=FX_video_3_chyifb&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=FX_video_5_rfwaq4&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_15_ypp6cd&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_29_c5gsmx&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_28_h9y8e4&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_1_fiaqdg&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_33_fn4rcn&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_30_okkpcy&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_31_ixme0e&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_32_gxronk&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_20_lzks8v&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_21_czk8ou&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_27_ba6ciu&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_22_l5tabm&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_23_ymad3y&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_24_wed2xf&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_25_ecdfmi&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_26_r62meq&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_19_oyndc5&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_17_pvmrdx&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_18_jrwncq&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+<div class="video-item">
+<iframe allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen="" frameborder="0" height="360" src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&amp;public_id=Fx_video_2_mtzc4b&amp;profile=new" style="height: auto; width: 100%; aspect-ratio: 640 / 360;" width="640"></iframe>
+</div>
+</div>
+<div class="video-nav">
+<div class="video-dot active"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+<div class="video-dot"></div>
+</div>
+<div class="video-arrow arrow-left">←</div>
+<div class="video-arrow arrow-right">→</div>
+</div>
+</section>
+<section class="section" id="contact">
+<div class="bg-video-wrapper"> 
+ <iframe
+      src="https://player.cloudinary.com/embed/?cloud_name=deyt4zjmt&public_id=0_Underwater_Ocean_1920x1080_kpww9b&profile=new"
+      width="640"
+      height="360"
+      style="height: auto; width: 100%; aspect-ratio: 640 / 360;"
+      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+      allowfullscreen
+      frameborder="0"
+    ></iframe>
+</div>
+<div class="content">
+<h2>Contact Me</h2>
+<p>Ready to elevate your project with world-class visual effects? Let’s collaborate to create something unforgettable.</p>
+
+<form action="https://formsubmit.co/abhijeetnaware5@gmail.com" method="POST">
+  <input type="hidden" name="_captcha" value="false">
+  <input type="hidden" name="_subject" value="New message from your portfolio site!">
+  <input type="hidden" name="_next" value="https://yourdomain.com/thank-you.html">
+
+  <input name="name" type="text" placeholder="Your Name" required />
+  <input name="email" type="email" placeholder="Your Email" required />
+  <textarea name="message" placeholder="Your Message" required rows="5"></textarea>
+  <button type="submit">Send Message</button>
+</form>
+
+</div>
+</section>
+<footer>
+<p>© 2025 Abhijeet Naware | All rights reserved.</p>
+<div class="social-links">
+<a href="tel:+91-9075308011" title="Phone">
+
+<img alt="Phone icon" src="https://res.cloudinary.com/deyt4zjmt/image/upload/v1753158097/phone_ohdyah.svg" style="width: 32px; height: 32px; vertical-align: middle;"></img></a>
+<a href="https://wa.me/+919075308011" target="_blank" title="WhatsApp">
+
+<img alt="WhatsApp icon" src="https://res.cloudinary.com/deyt4zjmt/image/upload/v1753158097/whatsapp_kdwitj.svg" style="width: 32px; height: 32px; vertical-align: middle;"></img></a>
+<a href="mailto:abhijeetnaware5@gmail.com" title="Email">
+
+<img alt="Email icon" src="https://res.cloudinary.com/deyt4zjmt/image/upload/v1753158097/gmail_h8e85y.svg" style="width: 32px; height: 32px; vertical-align: middle;"></img></a>
+<a href="https://vimeo.com/user143989097" target="_blank" title="Vimeo">
+
+<img alt="Vimeo icon" src="https://res.cloudinary.com/deyt4zjmt/image/upload/v1753158097/vimeo_mr2msm.svg" style="width: 32px; height: 32px; vertical-align: middle;"></img></a>
+<a href="https://www.linkedin.com/in/abhijeet-naware-125321155" target="_blank" title="LinkedIn">
+
+<img alt="LinkedIn icon" src="https://res.cloudinary.com/deyt4zjmt/image/upload/v1753158097/linkedin_pwr5cb.svg" style="width: 32px; height: 32px; vertical-align: middle;"></img></a>
+</div>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollToPlugin.min.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+        // --- Your original JavaScript code is here ---
+        // (No changes were needed for this part)
+
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Smooth scrolling for nav links
+        document.querySelectorAll('.navbar a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    gsap.to(window, {
+                        scrollTo: { y: targetElement, offsetY: 80 },
+                        duration: 0.8,
+                        ease: 'power2.out'
+                    });
+                } else {
+                    console.error(`Target element ${targetId} not found`);
+                }
+            });
+        });
+
+        // YouTube IFrame API
+        let players = [];
+        function onYouTubeIframeAPIReady() {
+            const iframes = document.querySelectorAll('.video-item iframe');
+            iframes.forEach((iframe, index) => {
+                // Extract the Video ID from the corrected URL
+                const videoId = new URL(iframe.src).pathname.split('/').pop();
+                
+                players[index] = new YT.Player(iframe, {
+                    playerVars: {
+                        autoplay: index === 0 ? 1 : 0,
+                        mute: 1,
+                        loop: 1,
+                        controls: 0,
+                        showinfo: 0,
+                        rel: 0,
+                        playlist: videoId // Required for the loop to work on a single video
+                    },
+                    events: {
+                        'onReady': (event) => {
+                            if (index === 0) event.target.playVideo();
+                        },
+                        'onError': (error) => {
+                            console.error(`Youtubeer Error (Video ${index}):`, error.data);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Full-screen video carousel
+        const videoSection = document.querySelector('.portfolio-video');
+        const container = videoSection.querySelector('.video-container');
+        const items = videoSection.querySelectorAll('.video-item');
+        const dots = videoSection.querySelectorAll('.video-dot');
+        const arrowLeft = videoSection.querySelector('.arrow-left');
+        const arrowRight = videoSection.querySelector('.arrow-right');
+        let currentIndex = 0;
+        let autoCycle;
+
+        function updateVideo() {
+            try {
+                items.forEach((item, index) => {
+                    item.classList.toggle('active', index === currentIndex);
+                    if (players[index] && players[index].playVideo) { // Check if player is ready
+                        if (index === currentIndex) {
+                            players[index].playVideo();
+                        } else {
+                            players[index].stopVideo();
+                        }
+                    }
+                });
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
+                gsap.to(container, {
+                    x: `-${currentIndex * 100}%`,
+                    duration: 0.4,
+                    ease: 'power2.out'
+                });
+            } catch (error) {
+                console.error('Error updating video carousel:', error);
+            }
+        }
+
+        function startAutoCycle() {
+            try {
+                stopAutoCycle();
+                // auto cycle removed
+            } catch (error) {
+                console.error('Error starting auto-cycle:', error);
+            }
+        }
+
+        function stopAutoCycle() {
+            if (autoCycle) {
+                clearInterval(autoCycle);
+            }
+        }
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                try {
+                    stopAutoCycle();
+                    currentIndex = index;
+                    updateVideo();
+                    startAutoCycle();
+                } catch (error) {
+                    console.error('Error on dot click:', error);
+                }
+            });
+        });
+
+        arrowLeft.addEventListener('click', () => {
+            try {
+                stopAutoCycle();
+                currentIndex = (currentIndex - 1 + items.length) % items.length;
+                updateVideo();
+                startAutoCycle();
+            } catch (error) {
+                console.error('Error on left arrow click:', error);
+            }
+        });
+
+        arrowRight.addEventListener('click', () => {
+            try {
+                stopAutoCycle();
+                currentIndex = (currentIndex + 1) % items.length;
+                updateVideo();
+                startAutoCycle();
+            } catch (error) {
+                console.error('Error on right arrow click:', error);
+            }
+        });
+
+        videoSection.addEventListener('mouseenter', stopAutoCycle);
+        videoSection.addEventListener('mouseleave', startAutoCycle);
+
+        // Initial video load (delay slightly to ensure API is ready)
+        // We let onYouTubeIframeAPIReady handle the initial play
+        function initializeCarousel() {
+             try {
+                updateVideo();
+                startAutoCycle();
+            } catch (error) {
+                console.error('Error initializing video carousel:', error);
+            }
+        }
+        
+        // The onYouTubeIframeAPIReady function will be called automatically when the script loads.
+        // We don't need to call initializeCarousel() manually from here anymore.
+
+
+        // Contact form JS removed for FormSubmit
+
+        // GSAP Animations (unchanged)
+        gsap.from('#home .content', {
+            opacity: 0,
+            y: 60,
+            duration: 0.8,
+            delay: 0.3,
+            stagger: 0.2
+        });
+
+        gsap.utils.toArray('.parallax').forEach(layer => {
+            gsap.to(layer, {
+                yPercent: 20,
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: layer.parentElement,
+                    scrub: 0.3,
+                    start: 'top bottom',
+                    end: 'bottom top'
+                }
+            });
+        });
+
+        gsap.from('.portfolio-video', {
+            y: 100,
+            opacity: 0,
+            duration: 0.8,
+            scrollTrigger: {
+                trigger: '.portfolio-video',
+                start: 'top 85%',
+                toggleActions: 'play none none reverse'
+            }
+        });
+
+        gsap.from('#contact .content', {
+            opacity: 0,
+            y: 60,
+            duration: 0.8,
+            scrollTrigger: {
+                trigger: '#contact',
+                start: 'top 85%',
+                toggleActions: 'play none none reverse'
+            }
+        });
+    </script>
+</body>
+</html>
