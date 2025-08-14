@@ -1,0 +1,414 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="description" content="Portfolio of Abhijeet Naware, FX Technical Director specializing in particle effects and fluid simulations"/>
+<meta name="keywords" content="VFX, FX artist, Houdini, Mumbai, portfolio"/>
+<meta property="og:title" content="Abhijeet Naware - FX Artist Portfolio"/>
+<meta property="og:description" content="Showcasing cinematic VFX work including particle effects and fluid simulations for films like Dune: Part Two and Masters of the Air"/>
+<meta property="og:image" content="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/fallback-image.jpg"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<title>Abhijeet Naware - FX Artist Portfolio</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', Courier, monospace; line-height: 1.6; }
+    body { background:#000; color:#fff; overflow-x:hidden; position:relative; }
+    
+    /* Navbar */
+    .navbar { position:fixed; top:0; width:100%; padding:15px 50px; background:rgba(0,0,0,0.9); z-index:1000; transition:background .15s ease; }
+    .navbar.scrolled { background: rgba(0,0,0,0.95); }
+    .navbar ul { list-style:none; display:flex; justify-content:center; gap:30px; }
+    .navbar a { color:#fff; text-decoration:none; font-size:1.2em; font-weight:500; text-transform:uppercase; transition:color .15s ease, transform .15s ease; }
+    .navbar a:hover { color:#ff3b3b; transform:scale(1.15); }
+
+    /* Sections */
+    .section { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:80px 50px; position:relative; background:#0a0a0a; overflow:hidden; }
+    #home { background: transparent !important; }
+    #about { background: transparent !important; }
+
+    /* Background video wrapper (R2 video backgrounds) */
+    .bg-video-wrapper { position:absolute; top:0; left:0; width:100%; height:100%; overflow:hidden; z-index:-3; }
+    .bg-video-wrapper video { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); transform-origin:center center; min-width:100%; min-height:100%; width:auto; height:auto; opacity:1; pointer-events:none; object-fit:cover; }
+
+    /* Home */
+    #home { text-align:center; }
+    #home .content { max-width:900px; z-index:2; position:absolute; }
+    #home h1 { font-size:clamp(2.8rem,6vw,6em); letter-spacing:5px; text-transform:uppercase; text-shadow:3px 3px 10px rgba(0,0,0,.7); color:#fff; transition:transform .3s ease; font-family: 'Inter', sans-serif; font-weight: 600; }
+    #home h1:hover { transform:scale(1.02); }
+    #home p { font-size:clamp(1rem,2.2vw,1.8em); color:#ddd; margin:20px 0; line-height:1.6; }
+    .cta { 
+        display:inline-block; 
+        padding:10px 30px; 
+        background:rgba(255, 255, 255, 0.1); 
+        backdrop-filter: blur(5px); 
+        color:#fff; 
+        text-decoration:none; 
+        font-weight:500; 
+        border: 1px solid transparent; 
+        transition:transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border 0.2s ease; 
+    }
+    .cta:hover { 
+        background: rgba(255, 255, 255, 0.15); 
+        transform: scale(1.1); 
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.6), 0 0 50px rgba(255, 59, 59, 0.4); 
+        border: 1px solid rgba(255, 255, 255, 0.7); 
+    }
+
+    /* About content */
+    #about .content { max-width:1000px; text-align:center; z-index:2; position:relative; }
+    #about .skills, #about .experience, #about .education { display:flex; justify-content:center; gap:20px; margin-top:30px; flex-wrap:wrap; }
+    .skill-item, .experience-item, .education-item { background:rgba(255, 255, 255, 0.1); backdrop-filter: blur(5px); padding:20px; border-radius:6px; font-size:1.05em; font-weight:500; text-align:center; transition:transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border 0.2s ease; border: 1px solid transparent; position:relative; }
+    .education-item a { color: inherit; text-decoration: none; display: block; width: 100%; height: 100%; }
+    .skill-item:hover, .experience-item:hover, .education-item:hover { 
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(1.1);
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.6), 0 0 50px rgba(255, 59, 59, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        color: #fff;
+    }
+    h2 { font-size:clamp(1.8rem,4vw,4em); margin-bottom:20px; text-transform:uppercase; font-weight:600; font-family: 'Inter', sans-serif; letter-spacing:2.5px; }
+    h3 { font-size:clamp(1.2rem,2.5vw,2em); margin-top:30px; margin-bottom:15px; text-transform:uppercase; font-family: 'Inter', sans-serif; letter-spacing:2px; font-weight:500; }
+
+    /* Portfolio / Work */
+    #portfolio { background:#000; padding:0; min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+    .parallax { position:absolute; width:100%; height:120%; top:0; left:0; z-index:-4; background-size:cover; background-attachment:fixed; }
+    .portfolio-video { position:relative; width:100vw; height:100vh; overflow:hidden; z-index:2; }
+    .portfolio-video video { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:100%; height:100%; object-fit:cover; opacity:0; transition:opacity 0.5s ease; transform-origin:center center; }
+    .portfolio-video video.loaded { opacity:1; }
+    .unmute-button { position:absolute; bottom:30px; right:30px; padding:10px 20px; background:#ff3b3b; color:#fff; border:none; border-radius:6px; font-size:1em; font-weight:500; cursor:pointer; transition:background .15s ease, transform .15s ease; z-index:3; }
+    .unmute-button:hover { background:#ff5c5c; transform:scale(1.05); }
+
+    /* Contact */
+    #contact { background:transparent !important; }
+    #contact .content { max-width:700px; text-align:center; z-index:2; position:relative; }
+    #contact form { display:flex; flex-direction:column; gap:15px; margin-top:15px; }
+    #contact input, #contact textarea { padding:15px; border:none; border-radius:6px; background:#222; color:#fff; font-size:1.05em; font-weight:400; transition:background .15s ease, transform .15s ease; }
+    #contact input:hover, #contact textarea:hover { background:#333; transform:scale(1.01); }
+    #contact button { padding:15px; border:none; border-radius:6px; background:#ff3b3b; color:#fff; font-size:1.05em; font-weight:500; cursor:pointer; transition:background .15s ease, transform .15s ease; }
+    #contact button:hover { background:#ff5c5c; transform:scale(1.02); }
+
+    /* Footer */
+    footer { background:#000; padding:20px; text-align:center; color:#888; z-index:2; position:relative; }
+    .social-links { display:flex; justify-content:center; gap:20px; margin-top:10px; }
+    .social-links a { display:inline-block; transition:transform .15s ease; }
+    .social-links a img { width:32px; height:32px; vertical-align:middle; display:block; }
+    .social-links a:hover { transform:scale(1.15); }
+
+    /* Responsive tweaks */
+    @media (max-width:768px) {
+        .navbar { padding:12px 20px; }
+        .navbar ul { gap:15px; }
+        .section { padding:60px 20px; }
+        #home h1 { font-size:clamp(2.2rem,7vw,3.5rem); }
+        #home p { font-size:clamp(1rem,2.2vw,1.2rem); }
+        .unmute-button { bottom:20px; right:20px; padding:8px 16px; font-size:0.9em; }
+    }
+    @media (max-width:480px) {
+        .navbar ul { flex-direction:column; gap:10px; }
+        .social-links a img { width:26px; height:26px; }
+        .unmute-button { bottom:15px; right:15px; padding:6px 12px; font-size:0.8em; }
+    }
+</style>
+</head>
+<body>
+<nav aria-label="Main navigation" class="navbar" role="navigation">
+<ul>
+<li><a href="#home">Home</a></li>
+<li><a href="#about">About</a></li>
+<li><a href="#portfolio">Work</a></li>
+<li><a href="#contact">Contact</a></li>
+</ul>
+</nav>
+<!-- HOME -->
+<section class="section" id="home" style="position:relative; background: transparent !important;">
+<div aria-hidden="true" class="bg-video-wrapper">
+<video autoplay="" loop="" muted="" playsinline="">
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_BG_1.m4v" type="video/mp4" media="(min-width:769px)"/>
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_BG_1_lowres.m4v" type="video/mp4" media="(max-width:768px)"/>
+<img alt="Fallback background" src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/fallback-image.jpg"/>
+</video>
+</div>
+<div class="content">
+<h1>Abhijeet Naware</h1>
+<p>FX Technical Director | Nanded, India<br/>Bringing cinematic visions to life with explosive particle effects, fluid simulations, and dynamic animations.</p>
+<a class="cta" href="#portfolio">Explore My Work</a>
+</div>
+</section>
+<!-- ABOUT -->
+<section class="section" id="about" style="position:relative;">
+<div aria-hidden="true" class="bg-video-wrapper">
+<video autoplay="" loop="" muted="" playsinline="">
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_BG_2.mp4" type="video/mp4" media="(min-width:769px)"/>
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_BG_2_lowres.mp4" type="video/mp4" media="(max-width:768px)"/>
+</video>
+</div>
+<div class="content">
+<h2>About Me</h2>
+<p>A passionate VFX artist with a knack for creating immersive visuals that captivate and inspire. Specializing in particle systems, fluid dynamics, and motion graphics, I use tools like Houdini, Maya, and Nuke to craft stunning effects for films and personal projects.</p>
+<div aria-label="Skills" class="skills">
+<div class="skill-item">Houdini</div>
+<div class="skill-item">Nuke</div>
+<div class="skill-item">Adobe Premier Pro</div>
+</div>
+<h3>Experience</h3>
+<div aria-label="Experience" class="experience">
+<div class="experience-item">
+<strong>DNEG – FX Technical Director</strong><br/>Mar 2022 – Present, Mumbai
+</div>
+<div class="experience-item">
+<strong>DNEG – Houdini FX Trainee</strong><br/>Nov 2021 – May 2022
+</div>
+</div>
+<h3>Projects</h3>
+<div aria-label="Projects" class="education">
+<div class="education-item"><a href="https://www.imdb.com/title/tt2640044/" target="_blank"><strong>Masters of the Air</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt12299608/" target="_blank"><strong>Mickey 17</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt15239678/" target="_blank"><strong>Dune: Part Two</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt27922706/" target="_blank"><strong>Chhaava</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt23572848/" target="_blank"><strong>The SpongeBob Movie (2025)</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt27995594/" target="_blank"><strong>Munjya</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt27056066/" target="_blank"><strong>Sky Force</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt13818368/" target="_blank"><strong>Fighter</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt7122126/" target="_blank"><strong>The Traveller</strong></a></div>
+<div class="education-item"><a href="https://www.imdb.com/title/tt14056466/" target="_blank"><strong>Yudhra</strong></a></div>
+</div>
+</div>
+</section>
+<!-- WORK / PORTFOLIO -->
+<section class="section" id="portfolio" style="padding:0; overflow:visible;">
+<div class="parallax" style="background-image:url('https://images.unsplash.com/photo-1618005182380-9d8e6105c7e9?ixlib=rb-4.0.3&amp;auto=format&amp;fit=crop&amp;w=1920&amp;q=80');"></div>
+<h2 style="z-index:3; position:relative; margin-top:20px;">Work</h2>
+<div aria-label="Portfolio video" class="portfolio-video">
+<video loop playsinline preload="metadata" aria-label="Showreel of Abhijeet Naware’s VFX work">
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_SHOWREEL_ABHIJEET_NAWARE_2025.mp4" type="video/mp4" media="(min-width:769px)"/>
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_SHOWREEL_ABHIJEET_NAWARE_2025_lowres.mp4" type="video/mp4" media="(max-width:768px)"/>
+<img alt="Fallback VFX showreel image" src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/fallback-vfx.jpg"/>
+</video>
+<button class="unmute-button" aria-label="Toggle mute" tabindex="0">Unmute</button>
+</div>
+</section>
+<!-- CONTACT -->
+<section class="section" id="contact" style="position:relative;">
+<div aria-hidden="true" class="bg-video-wrapper">
+<video autoplay="" loop="" muted="" playsinline="">
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_BG_3.mp4" type="video/mp4" media="(min-width:769px)"/>
+<source src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/FX_BG_3_lowres.mp4" type="video/mp4" media="(max-width:768px)"/>
+</video>
+</div>
+<div class="content">
+<h2>Contact Me</h2>
+<p>Ready to elevate your project with world-class visual effects? Let’s collaborate to create something unforgettable.</p>
+<form action="https://formsubmit.co/abhijeetnaware5@gmail.com" method="POST">
+<input name="_captcha" type="hidden" value="false"/>
+<input name="_subject" type="hidden" value="New message from your portfolio site!"/>
+<input name="_next" type="hidden" value="https://yourdomain.com/thank-you.html"/>
+<input name="name" placeholder="Your Name" required="" type="text"/>
+<input name="email" placeholder="Your Email" required="" type="email"/>
+<textarea name="message" placeholder="Your Message" required="" rows="5"></textarea>
+<button type="submit">Send Message</button>
+</form>
+</div>
+</section>
+<!-- FOOTER -->
+<footer>
+<p>© 2025 Abhijeet Naware | All rights reserved.</p>
+<div aria-label="Social links" class="social-links">
+<a href="tel:+91-9075308011" title="Phone">
+<img alt="Phone icon" src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/phone.svg"/>
+</a>
+<a href="https://wa.me/+919075308011" target="_blank" title="WhatsApp">
+<img alt="WhatsApp icon" src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/whatsapp.svg"/>
+</a>
+<a href="mailto:abhijeetnaware5@gmail.com" title="Email">
+<img alt="Email icon" src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/gmail.svg"/>
+</a>
+<a href="https://vimeo.com/user143989097" target="_blank" title="Vimeo">
+<img alt="Vimeo icon" src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/vimeo.svg"/>
+</a>
+<a href="https://www.linkedin.com/in/abhijeet-naware-125321155" target="_blank" title="LinkedIn">
+<img alt="LinkedIn icon" src="https://pub-0b9ff035e2d8489195ebc73d9cbe6f24.r2.dev/linkedin.svg"/>
+</a>
+</div>
+</footer>
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Function to adjust video scaling
+  function adjustVideoScale(videoElement) {
+    if (!videoElement.videoWidth || !videoElement.videoHeight) return;
+    const videoAspectRatio = videoElement.videoWidth / videoElement.videoHeight;
+    const windowAspectRatio = window.innerWidth / window.innerHeight;
+    const scale = videoAspectRatio > windowAspectRatio ? 
+      window.innerHeight / videoElement.videoHeight : 
+      window.innerWidth / videoElement.videoWidth;
+    videoElement.style.transform = `translate(-50%, -50%) scale(${Math.max(1, scale * 1.01)})`;
+  }
+
+  // Handle background videos
+  const bgVideos = document.querySelectorAll('.bg-video-wrapper video');
+  bgVideos.forEach(bgVideo => {
+    bgVideo.play().catch(err => console.error('Background video autoplay failed:', err));
+    bgVideo.addEventListener('loadedmetadata', () => adjustVideoScale(bgVideo));
+  });
+
+  // Handle portfolio video and controls
+  const portfolioSection = document.querySelector('#portfolio');
+  const portfolioVideo = document.querySelector('#portfolio video');
+  const unmuteButton = document.querySelector('.unmute-button');
+  if (portfolioVideo) {
+    // Set initial muted state
+    portfolioVideo.muted = true;
+    if (unmuteButton) {
+      unmuteButton.textContent = 'Unmute';
+    }
+    // Add loaded class when video metadata is loaded
+    portfolioVideo.addEventListener('loadedmetadata', () => {
+      portfolioVideo.classList.add('loaded');
+      adjustVideoScale(portfolioVideo);
+    });
+    // Disable right-click on portfolio video
+    portfolioVideo.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+    // Play on hover, pause on mouse leave
+    portfolioSection.addEventListener('mouseenter', () => {
+      portfolioVideo.play().catch(err => console.error('Portfolio video play failed:', err));
+    });
+    portfolioSection.addEventListener('mouseleave', () => {
+      portfolioVideo.pause();
+    });
+    // Toggle play/pause on click
+    portfolioVideo.addEventListener('click', () => {
+      if (!portfolioVideo.paused) {
+        portfolioVideo.pause();
+      } else {
+        portfolioVideo.play().catch(err => console.error('Portfolio video play failed:', err));
+      }
+    });
+    // Keyboard accessibility for click (space or enter)
+    portfolioVideo.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        if (!portfolioVideo.paused) {
+          portfolioVideo.pause();
+        } else {
+          portfolioVideo.play().catch(err => console.error('Portfolio video play failed:', err));
+        }
+      }
+    });
+    // Unmute/mute toggle
+    if (unmuteButton) {
+      unmuteButton.addEventListener('click', () => {
+        portfolioVideo.muted = !portfolioVideo.muted;
+        unmuteButton.textContent = portfolioVideo.muted ? 'Unmute' : 'Mute';
+      });
+      unmuteButton.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          portfolioVideo.muted = !portfolioVideo.muted;
+          unmuteButton.textContent = portfolioVideo.muted ? 'Unmute' : 'Mute';
+        }
+      });
+    }
+    // Pause video when scrolling out of view
+    ScrollTrigger.create({
+      trigger: portfolioSection,
+      start: 'top bottom',
+      end: 'bottom top',
+      onLeave: () => portfolioVideo.pause(),
+      onLeaveBack: () => portfolioVideo.pause()
+    });
+  }
+
+  // Update video scaling on window resize
+  window.addEventListener('resize', () => {
+    bgVideos.forEach(bgVideo => adjustVideoScale(bgVideo));
+    if (portfolioVideo) adjustVideoScale(portfolioVideo);
+  });
+
+  // Navbar scroll effect
+  const navbar = document.querySelector('.navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+
+  // Smooth scroll using GSAP
+  document.querySelectorAll('.navbar a').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const targetId = this.getAttribute('href');
+      const el = document.querySelector(targetId);
+      if (el) {
+        gsap.to(window, { duration: 0.8, ease: 'power2.out', scrollTo: { y: el, offsetY: 80 } });
+      }
+    });
+  });
+
+  // GSAP entrance animations
+  gsap.from('#home .content', { opacity: 0, y: 60, duration: 0.8, delay: 0.3, stagger: 0.2 });
+
+  gsap.utils.toArray('.parallax').forEach(layer => {
+    gsap.to(layer, {
+      yPercent: 20,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: layer.parentElement,
+        scrub: 0.3,
+        start: 'top bottom',
+        end: 'bottom top'
+      }
+    });
+  });
+
+  gsap.from('.portfolio-video', {
+    y: 100, opacity: 0, duration: 0.8,
+    scrollTrigger: { trigger: '.portfolio-video', start: 'top 85%', toggleActions: 'play none none reverse' }
+  });
+
+  gsap.from('#contact .content', {
+    opacity: 0, y: 60, duration: 0.8,
+    scrollTrigger: { trigger: '#contact', start: 'top 85%', toggleActions: 'play none none reverse' }
+  });
+});
+</script>
+</body>
+</html>
